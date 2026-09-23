@@ -1,0 +1,11 @@
+streamlit>=1.38
+langchain>=0.3
+langchain-groq>=0.2
+langchain-chroma>=0.1
+langchain-huggingface>=0.1
+chromadb>=0.5
+sentence-transformers>=3.0
+torchvision>=0.19
+python-dotenv>=1.0
+groq>=0.11
+requests>=2.32
