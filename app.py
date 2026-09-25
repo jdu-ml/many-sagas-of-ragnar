@@ -203,10 +203,9 @@ def render_playing_screen() -> None:
         is_selected = (st.session_state.processing and st.session_state.last_choice_id == choice["choice_id"])
 
         label = f"{choice_number}. {choice['text']}"
-        if is_selected:
-            label = f"{label} ✅"
 
-        clicked = st.button(label, key = f"choice_{choice['choice_id']}",
+        key_suffix = "_selected" if is_selected else ""
+        clicked = st.button(label, key = f"choice_{choice['choice_id']}{key_suffix}",
                             disabled = st.session_state.processing, 
                             type = "secondary", use_container_width = True)
         if clicked and not st.session_state.processing:

@@ -1,5 +1,4 @@
 # theme.py
-# need to change color of spinner (not working)
 """
 Injects custom CSS into Streamlit app
 """
@@ -82,10 +81,19 @@ def apply_theme() -> None:
             color: var(--text);
         }}
 
-        # /* Spinner */
-        # [data-testid="stSpinnerIcon"] {{
-        # color: red !important;
-        # }}
+        /* Spinner icon */
+        /* border-color is the whole ring (gray) while border-top-color is the top (orange) */
+        [data-testid*="Spinner"],
+        [data-testid*="Spinner"] * {{
+            border-color: var(--rule) !important;
+            border-top-color: var(--accent) !important;
+        }}
+
+        / * Spinner text */
+        [data-testid*="Spinner"] [data-testid="stMarkdownContainer"],
+        [data-testid*="Spinner"] [data-testid="stMarkdownContainer"] * {{
+            color: var(--text) !important;
+        }}
         
         
         /* ------- Main Typography -------- */
@@ -198,6 +206,14 @@ def apply_theme() -> None:
         /* Button disabled */
         div.stButton > button:disabled {{
             opacity: 0.55;
+        }}
+
+        /* Choice button on select */
+        [class*="_selected"] div.stButton > button:disabled {{
+            opacity: 1 !important;
+            border: 2px solid var(--accent) !important;
+            background-color: var(--accent-soft) !important;
+            color: var(--text) !important;
         }}
 
         /* Button type primary are center aligned */
