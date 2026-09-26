@@ -75,16 +75,15 @@ def build_narration_prompt(current_context: str, choice_text: str, choice_outcom
                 RELEVANT NORSE LORE: {lore_block}
 
                 INSTRUCTIONS:
-                - This is the final turn. Narrate the ending itself, expanding on OUTCOME.
-                - Write exactly 1 paragraph with no more than 4 sentences to bring the story to a close.
-                - Use the supplied Norse lore as grounding for how this death/ending is portrayed.
-                - Do not change the game outcome or invent game mechanics.
-                - Do not introduce choices.
-                - Keep the narrative appropriate to the current story and tone
-                - Narrate in second person ("you"), matching the POV used in CURRENT CONTEXT and OUTCOME.
-                Do not describe Ragnar's actions in third person (e.g. "Ragnar draws his sword"). Using 
-                his name or epithet is fine only when it's something said about or to him by others 
-                (e.g. "they call you Ragnar Lothbrok, hairy-breeches")
+                - Narrate in second person ("you"), never third person ("Ragnar draws his sword").
+                His name/epithet is fine only in dialogue said to or about him by others.
+
+                - Expand OUTCOME into the ending. Ground it in the supplied lore. Bring the story to a close.
+
+                - Exactly 1 paragraph, max 4 sentences.
+
+                - Stay true to OUTCOME and the story's tone - no invented mechanics, no choices,
+                no material from the Vikings TV show or other fictional settings.
                 """
 
     return f"""You are the narrator of a Viking historical-fiction adventure, in the tone of the TV series Vikings.
@@ -103,24 +102,21 @@ def build_narration_prompt(current_context: str, choice_text: str, choice_outcom
             RELEVANT NORSE LORE: {lore_block}
 
             INSTRUCTIONS:
-            - Narrate what happens as a result of the player's choice, expanding on OUTCOME.
-            - Use the supplied Norse lore as grounding and to support reconciling OUTCOME
-            with NEXT CONTEXT where they would otherwise conflict.
-            - Stop as soon as OUTCOME has been resolved. Your narration should end on a
-            quiet, transitional beat (e.g. time passing, a mood, a journey continuing) -
-            NOT on the edge of a new scene, encounter, or challenge.
-            - NEXT CONTEXT is given only so you know what must remain true afterward -
-            it is NOT something to preview, foreshadow, or write toward. Do not mention,
-            describe, or hint at any specific person, object, place, creature, trial, or
-            event that first appears in NEXT CONTEXT. If NEXT CONTEXT introduces a bear,
-            for example, your narration must not mention a bear, an animal, a guardian,
-            a trial, or anything suggesting one is coming.
-            - Write exactly 1 paragraph with no more than 4 sentences. Do not write a full scene.
-            - Do not change the game outcome or invent game mechanics.
-            - Do not introduce choices.
-            - Keep the narrative appropriate to the current story and tone.
-            - Narrate in second person ("you"), matching the POV used in CURRENT CONTEXT and OUTCOME.
-            Do not describe Ragnar's actions in third person (e.g. "Ragnar draws his sword"). Using 
-            his name or epithet is fine only when it's something said about or to him by others 
-            (e.g. "they call you Ragnar Lothbrok, hairy-breeches")
+            - Narrate in second person ("you"), never third person ("Ragnar draws his sword").
+            His name/epithet is fine only in dialogue said to or about him by others 
+            (e.g. "they call you Ragnar Lothbrok, hairy-breeches").
+
+            - Expand OUTCOME into what happens next. Use the supplied lore to ground it and to
+            reconcile OUTCOME with NEXT CONTEXT if they'd otherwise conflict.
+
+            - NEXT CONTEXT is for your awareness only - do not preview, foreshadow, or
+            hint at any person, object, place, or event that first appears there.
+
+            - Stop once OUTCOME is resolved, on a quiet transitional beat - not on the
+            edge of a new scene or challenge.
+
+            - Exactly 1 paragraph, max 4 sentences.
+
+            - Stay true to OUTCOME and the story's tone - no invented mechanics, no choices,
+            no material from the Vikings TV show or other fictional settings.
             """
