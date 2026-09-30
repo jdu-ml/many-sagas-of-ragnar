@@ -18,7 +18,7 @@ from typing import Optional
 STARTING_VALUES = {"health": 100, 
                    "renown": 10,
                    "morale": 55,
-                   "warband_loyalty": 50,
+                   "warband_loyalty": 40,
                    "favor_of_fate": 0}
 
 # Min/max for each stat
