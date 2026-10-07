@@ -10,15 +10,19 @@ from langchain_chroma import Chroma
 # Constants
 DEFAULT_K = 3
 VALID_CATEGORIES = {"saga_history", "mythology"}
+_vector_store = None
+
 
 def get_vector_store() -> Chroma:
-    """Loads Chroma store"""
+    """Loads Chroma store once and then reuses it"""
+    global _vector_store
 
-    vector_store = Chroma(collection_name = COLLECTION_NAME,
-                          embedding_function = get_embedding_function(),
-                          persist_directory = str(CHROMA_DIR))
+    if _vector_store is None:
+        _vector_store = Chroma(collection_name = COLLECTION_NAME,
+                               embedding_function = get_embedding_function(),
+                               persist_directory = str(CHROMA_DIR))
 
-    return vector_store
+    return _vector_store
 
 
 def retrieve(query: str, k: int = DEFAULT_K, category: str | None = None) -> list[dict]:
