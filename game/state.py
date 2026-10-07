@@ -11,7 +11,7 @@ Stat definition:
 """
 
 # Import libraries
-from dataclasses import dataclass, field, asdict
+from dataclasses import dataclass, field
 from typing import Optional
 
 # Player starting stats
@@ -44,9 +44,6 @@ class GameState:
 
     # (turn, node_id, choice_id) tuples
     history: list = field(default_factory = list)
-
-    # def as_dict(self) -> dict:
-    #     return asdict(self)
 
     def stats_only(self) -> dict:
         return {"health": self.health, 
