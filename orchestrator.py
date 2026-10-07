@@ -7,7 +7,7 @@ into one narration flow per turn
 - run_turn(): calls get_prompt_for_turn(), then calls the LLM. NOT
     cached
 
-Callers (CLI test script, Streamlit) should only ever call run_turn().
+Callers (CLI test script, Streamlit) should only call run_turn().
 get_prompt_for_turn() is exposed separately mainly so Streamlit's caching
 decorator can be applied to it directly
 """
@@ -38,7 +38,7 @@ def _get_choice(node_id: str, choice_id: str) -> tuple[dict, dict]:
 
 def get_prompt_for_turn(node_id: str, choice_id: str) -> dict:
     """
-    Constructs narration prompt for the turn by buildin the retrieval query,
+    Constructs narration prompt for the turn by building the retrieval query 
     and retrieving grounding lore
     """
     node, choice = _get_choice(node_id, choice_id)
