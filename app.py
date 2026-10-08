@@ -11,14 +11,19 @@ Screen flow (st.session_state):
 Session state fields:
     screen              str, one of the four states above
     game_state          game.state.GameState instance
-    last_choice_id      choice_id the player just picked (set going into "narrating")
-    narration_result    dict returned by orchestrator.run_turn(), or None
-    retry_count         int, resets to 0 at the start of every turn
+    last_choice_id      choice_id the player just picked
+    narration_result    dict in the shape returned by orchestrator.run_turn()
+    retry_count         int, number of narration retries used this turn
+    processing          bool, True while a picked choice is being handled
+                        (disables the choice buttons)
+    warmed_up           bool, True once warm_up_backend() has run
+    last_deltas         dict of {stat: delta} from the most recent choice
 """
 
 # Import libraries
 import time
 import streamlit as st
+from game.engine import MAX_TURNS
 from game.state import GameState
 from game.story import STORY, START_NODE
 from theme import apply_theme, render_stat_bar
@@ -44,7 +49,7 @@ STAT_DESCRIPTIONS = {"health": "Physical condition. Falls with wounds and hardsh
 
 SKIP_NARRATION_LINES = ["The tale moves swiftly on, as sagas often do...",
                         "Not every deed is sung in full, the story presses forward...",
-                        "The skalds fall briefly silent, and fate carries you onward..."]
+                        "The skalds fall briefly silent and fate carries you onward..."]
 
 # ---------------------------------------------------------------------------
 # Session state helpers
@@ -132,14 +137,14 @@ def render_sidebar() -> None:
     Restart Saga button that resets the game immediately
     """
     with st.sidebar:
-        st.subheader("Stats Glossary")
-        st.markdown("Choices affect these values")
+        st.subheader("Your Standing")
+        st.markdown("Every choice you make shifts the balance of these")
         for stat_key, label in STAT_LABELS.items():
             st.markdown(f"**{label} ({STAT_RANGES[stat_key]})**  \n{STAT_DESCRIPTIONS[stat_key]}")
 
         if st.session_state.screen in ("playing", "narrating"):
             st.divider()
-            st.markdown("**Danger Zone**")
+            st.markdown("**Rewrite Your Fate**")
             if st.button("Restart Saga", type = "primary", use_container_width = True):
                 reset_game()
                 st.rerun()
@@ -149,12 +154,12 @@ def render_sidebar() -> None:
 # Screen: start
 # ---------------------------------------------------------------------------
 def render_start_screen() -> None:
-    st.write("Take on the role of Ragnar Lothbrok, legendary Viking king and "
-             "raider. Across ten turns drawn from Norse saga and mythology, "
-             "your choices will shape how his story is told.")
+    st.write("You are Ragnar Lothbrok, legendary raider and king. The gods are "
+             "watching and the skalds are listening. Across ten turns, your choices "
+             "decide which version of your legend is told.")
 
     if not st.session_state.warmed_up:
-        with st.spinner("Waking the skalds... loading the narration engine and lore index..."):
+        with st.spinner("The skalds are taking their places... your legend will begin shortly."):
             warm_up_backend()
         st.session_state.warmed_up = True
 
@@ -192,7 +197,7 @@ def render_playing_screen() -> None:
 
     render_stats_header(state)
 
-    st.markdown(f"#### Turn {node['turn']} of 10")
+    st.markdown(f"#### Turn {node['turn']} of {MAX_TURNS}")
     st.header(node["title"])
     st.markdown(f"#### *{location}*")
     st.write(node["context"])
@@ -253,7 +258,7 @@ def render_narrating_screen() -> None:
         st.write(result["narration"])
 
         is_last_turn = choice["next_node"] is None
-        label = "See How the Saga Ends" if is_last_turn else "Continue"
+        label = "Let the Skalds Sing" if is_last_turn else "Continue"
 
         if st.button(label, type = "primary"):
             _advance_turn(choice)
@@ -309,21 +314,21 @@ def render_ended_screen() -> None:
     state = st.session_state.game_state
     result = st.session_state.narration_result
 
-    st.header("The Saga Ends")
+    st.header("The Saga Is Sung")
 
     if result and result.get("narration"):
         st.write(result["narration"])
 
     st.divider()
-    st.write("**Your saga is remembered as:**")
+    st.write("**How the skalds will remember you:**")
 
     st.markdown("  \n".join(f"**{STAT_LABELS[stat_key]}:** {getattr(state, stat_key)}"
             for stat_key in STAT_LABELS))
 
     st.write("")
-    _, _, corner = st.columns([1, 3, 1])
+    _, _, corner = st.columns([1, 2, 1])
     with corner:
-        if st.button("Play Again", type = "primary", use_container_width = True):
+        if st.button("Tell Another Saga", type = "primary", use_container_width = True):
             reset_game()
             st.rerun()
 
