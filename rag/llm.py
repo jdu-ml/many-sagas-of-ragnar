@@ -11,10 +11,15 @@ from langchain_groq import ChatGroq
 # Constants
 MODEL_NAME = "openai/gpt-oss-120b"
 load_dotenv()
+model = None
 
 
 def get_llm() -> ChatGroq:
-    """Loads the Groq chat model"""
+    """Loads the Groq model once and then reuses it"""
+    global model
+
+    if model is not None:
+        return model
 
     api_key = os.getenv("GROQ_API_KEY")
 
