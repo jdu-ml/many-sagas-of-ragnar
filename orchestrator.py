@@ -19,7 +19,7 @@ from rag.prompts import get_category_for_turn, build_retrieval_query, build_narr
 from rag.llm import generate_narration
 
 # Constants
-UI_ERROR_MESSAGE = "The skalds falter in their telling of this tale... try again."
+UI_ERROR_MESSAGE = "The skalds falter in their telling of this tale..."
 
 
 def _get_choice(node_id: str, choice_id: str) -> tuple[dict, dict]:
