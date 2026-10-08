@@ -63,14 +63,12 @@ def get_prompt_for_turn(node_id: str, choice_id: str) -> dict:
 
 def run_turn(node_id: str, choice_id: str) -> dict:
     """
-    Constructs the narration prompt and generates narration text via Groq.
+    Constructs the narration prompt and generates narration text via Groq
 
     On Groq failure (rag.llm.generate_narration raises RuntimeError), this
     is caught here rather than re-raised - the caller (CLI, Streamlit)
     should check `success` rather than use try/except. This is also the
-    entry point retry buttons should call again: get_prompt_for_turn()'s
-    result should be cached by the caller (e.g. via st.cache_data) so a
-    retry only re-attempts the Groq call, not retrieval or prompt-building.
+    entry point retry buttons call again
 
     Returns a dict with:
         success            bool
