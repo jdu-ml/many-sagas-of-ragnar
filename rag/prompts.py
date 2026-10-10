@@ -5,6 +5,9 @@ Constructs the retrieval query and narration prompt
 - narration prompt is handed to rag.llm.generate_narration()
 """
 
+# Import libraries
+from langchain_core.prompts import PromptTemplate
+
 
 def get_category_for_turn(turn_number: int) -> str | None:
     """
@@ -55,68 +58,77 @@ def format_lore(retrieved_chunks: list[dict]) -> str:
     return "\n\n".join(f"[{chunk['title']}] {chunk['text']}" for chunk in retrieved_chunks)
 
 
-def build_narration_prompt(current_context: str, choice_text: str, choice_outcome: str, 
+NARRATION_TEMPLATE = PromptTemplate.from_template(
+    """You are the narrator of a Viking historical-fiction adventure, in the tone of the TV series Vikings.
+
+    PLAYER: Ragnar Lothbrok
+
+    CURRENT CONTEXT (already shown to the player, do not repeat):
+    {current_context}
+
+    PLAYER'S CHOICE: {choice_text}
+    OUTCOME (author-written beat to expand into narrative): {choice_outcome}
+
+    NEXT CONTEXT (must lead into this, do not narrate its events):
+    {next_context}
+
+    RELEVANT NORSE LORE: {lore_block}
+
+    INSTRUCTIONS:
+    - Narrate in second person ("you"), never third person ("Ragnar draws his sword").
+    His name/epithet is fine only in dialogue said to or about him by others
+    (e.g. "they call you Ragnar Lothbrok, hairy-breeches").
+
+    - Expand OUTCOME into what happens next. Use the supplied lore to ground it and to
+    reconcile OUTCOME with NEXT CONTEXT if they'd otherwise conflict.
+
+    - NEXT CONTEXT is for your awareness only - do not preview, foreshadow, or
+    hint at any person, object, place, or event that first appears there.
+
+    - Stop once OUTCOME is resolved, on a quiet transitional beat - not on the
+    edge of a new scene or challenge.
+
+    - Exactly 1 paragraph, max 4 sentences.
+
+    - Stay true to OUTCOME and the story's tone - no invented mechanics, no choices,
+    no material from the Vikings TV show or other fictional settings.
+    """)
+
+ENDING_TEMPLATE = PromptTemplate.from_template(
+    """You are the narrator of a Viking historical-fiction adventure, in the tone of the TV series Vikings.
+
+    PLAYER: Ragnar Lothbrok
+
+    CURRENT CONTEXT (already shown to the player, do not repeat):
+    {current_context}
+
+    PLAYER'S CHOICE: {choice_text}
+    OUTCOME (author-written beat to expand into narrative): {choice_outcome}
+
+    RELEVANT NORSE LORE: {lore_block}
+
+    INSTRUCTIONS:
+    - Narrate in second person ("you"), never third person ("Ragnar draws his sword").
+    His name/epithet is fine only in dialogue said to or about him by others.
+
+    - Expand OUTCOME into the ending. Ground it in the supplied lore. Bring the story to a close.
+
+    - Exactly 1 paragraph, max 4 sentences.
+
+    - Stay true to OUTCOME and the story's tone - no invented mechanics, no choices,
+    no material from the Vikings TV show or other fictional settings.
+    """)
+
+def build_narration_prompt(current_context: str, choice_text: str, choice_outcome: str,
                            next_context: str | None, retrieved_chunks: list[dict]) -> str:
     """Builds the narration prompt"""
-    
-    lore_block = format_lore(retrieved_chunks)
+
+    values = {"current_context": current_context,
+              "choice_text": choice_text,
+              "choice_outcome": choice_outcome,
+              "lore_block": format_lore(retrieved_chunks)}
 
     if next_context is None:
-        return f"""You are the narrator of a Viking historical-fiction adventure, in the tone of the TV series Vikings.
+        return ENDING_TEMPLATE.format(**values)
 
-                PLAYER: Ragnar Lothbrok
-
-                CURRENT CONTEXT (already shown to the player, do not repeat):
-                {current_context}
-
-                PLAYER'S CHOICE: {choice_text}
-                OUTCOME (author-written beat to expand into narrative): {choice_outcome}
-
-                RELEVANT NORSE LORE: {lore_block}
-
-                INSTRUCTIONS:
-                - Narrate in second person ("you"), never third person ("Ragnar draws his sword").
-                His name/epithet is fine only in dialogue said to or about him by others.
-
-                - Expand OUTCOME into the ending. Ground it in the supplied lore. Bring the story to a close.
-
-                - Exactly 1 paragraph, max 4 sentences.
-
-                - Stay true to OUTCOME and the story's tone - no invented mechanics, no choices,
-                no material from the Vikings TV show or other fictional settings.
-                """
-
-    return f"""You are the narrator of a Viking historical-fiction adventure, in the tone of the TV series Vikings.
-
-            PLAYER: Ragnar Lothbrok
-
-            CURRENT CONTEXT (already shown to the player, do not repeat):
-            {current_context}
-
-            PLAYER'S CHOICE: {choice_text}
-            OUTCOME (author-written beat to expand into narrative): {choice_outcome}
-
-            NEXT CONTEXT (must lead into this, do not narrate its events):
-            {next_context}
-
-            RELEVANT NORSE LORE: {lore_block}
-
-            INSTRUCTIONS:
-            - Narrate in second person ("you"), never third person ("Ragnar draws his sword").
-            His name/epithet is fine only in dialogue said to or about him by others 
-            (e.g. "they call you Ragnar Lothbrok, hairy-breeches").
-
-            - Expand OUTCOME into what happens next. Use the supplied lore to ground it and to
-            reconcile OUTCOME with NEXT CONTEXT if they'd otherwise conflict.
-
-            - NEXT CONTEXT is for your awareness only - do not preview, foreshadow, or
-            hint at any person, object, place, or event that first appears there.
-
-            - Stop once OUTCOME is resolved, on a quiet transitional beat - not on the
-            edge of a new scene or challenge.
-
-            - Exactly 1 paragraph, max 4 sentences.
-
-            - Stay true to OUTCOME and the story's tone - no invented mechanics, no choices,
-            no material from the Vikings TV show or other fictional settings.
-            """
+    return NARRATION_TEMPLATE.format(next_context=next_context, **values)
