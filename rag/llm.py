@@ -27,7 +27,7 @@ def get_llm() -> ChatGroq:
         raise ValueError("GROQ_API_KEY not found in environment. Check .env file.")
 
     model = ChatGroq(model = MODEL_NAME, api_key = api_key, 
-                     reasoning_effort = "low", temperature = 0.8)
+                     reasoning_effort = "medium", temperature = 0.8)
 
     return model
 
